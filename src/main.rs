@@ -36,8 +36,8 @@ enum Rank {
 
 #[derive(Debug, Clone, Copy)]
 struct Card {
-    suit: Suit,
     rank: Rank,
+    suit: Suit,
 }
 
 impl Card {
@@ -47,8 +47,6 @@ impl Card {
 }
 
 type DeckType = VecDeque<Card>;
-
-// impl SliceRandom for DeckType {}
 
 #[derive(Debug)]
 struct Deck {
@@ -96,9 +94,11 @@ impl Deck {
     }
 
     pub fn shuffle(&mut self) {
-        rand::thread_rng().gen_range(1, 53);
-        // let mut rng = thread_rng();
-        &self.cards;
+        for _ in 0..=50 {
+            let r1 = rand::thread_rng().gen_range(0, 52);
+            let r2 = rand::thread_rng().gen_range(0, 52);
+            self.cards.swap(r1, r2);
+        }
     }
 
     pub fn deal_one(&mut self) -> Option<Card> {
@@ -110,11 +110,23 @@ impl Deck {
         }
     }
 
-    // pub fn deal_few(&mut self, amount: u8) -> Card {}
+    // pub fn deal_few(&mut self, amount: u8) {
+    pub fn deal_few(&mut self, amount: u8) -> Option<DeckType> {
+        let mut dealt_cards: DeckType = VecDeque::new();
+        if amount > self.count {
+            for _ in 1..=amount {
+                dealt_cards.push_front(self.deal_one().unwrap());
+            }
+            Some(dealt_cards)
+        } else {
+            None
+        }
+    }
 }
 
 fn main() {
     let mut deck = Deck::new();
+    deck.shuffle();
     // let card = deck.deal_one();
     // println!("{:?}", card);
     // let card = deck.deal_one();
@@ -126,7 +138,22 @@ fn main() {
     // let card = deck.deal_one();
     // println!("{:?}", card);
 
-    // println!("{:?}", deck);
+    println!("{:?}", deck);
     // println!("{:?}", card);
     // println!("{:?}", deck);
+}
+
+#[cfg(test)]
+#[test]
+fn deck_init() {
+    let mut deck = Deck::new();
+    assert_eq!(deck.count, 52);
+}
+
+#[cfg(test)]
+#[test]
+fn deck_methods() {
+    let mut deck = Deck::new();
+    deck.deal_one();
+    assert_eq!(deck.count, 51);
 }
