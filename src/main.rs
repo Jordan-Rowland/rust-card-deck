@@ -1,6 +1,4 @@
 use rand::prelude::*;
-use rand::seq::SliceRandom;
-use rand::thread_rng;
 
 use std::collections::VecDeque;
 
@@ -93,6 +91,13 @@ impl Deck {
         }
     }
 
+    pub fn from(cards: DeckType) -> Self {
+        Self {
+            cards: cards.clone(),
+            count: cards.len() as u8,
+        }
+    }
+
     pub fn shuffle(&mut self) {
         for _ in 0..=50 {
             let r1 = rand::thread_rng().gen_range(0, 52);
@@ -110,10 +115,9 @@ impl Deck {
         }
     }
 
-    // pub fn deal_few(&mut self, amount: u8) {
     pub fn deal_few(&mut self, amount: u8) -> Option<DeckType> {
         let mut dealt_cards: DeckType = VecDeque::new();
-        if amount > self.count {
+        if self.count > amount {
             for _ in 1..=amount {
                 dealt_cards.push_front(self.deal_one().unwrap());
             }
@@ -127,33 +131,43 @@ impl Deck {
 fn main() {
     let mut deck = Deck::new();
     deck.shuffle();
-    // let card = deck.deal_one();
-    // println!("{:?}", card);
-    // let card = deck.deal_one();
-    // println!("{:?}", card);
-    // let card = deck.deal_one();
-    // println!("{:?}", card);
-    // let card = deck.deal_one();
-    // println!("{:?}", card);
-    // let card = deck.deal_one();
-    // println!("{:?}", card);
 
-    println!("{:?}", deck);
-    // println!("{:?}", card);
-    // println!("{:?}", deck);
+    let ten = deck.deal_few(10).unwrap();
+    println!("{:?}", &ten);
+
+    let d2 = Deck::from(ten);
+    println!("{:?}", d2.cards)
 }
 
 #[cfg(test)]
-#[test]
-fn deck_init() {
-    let mut deck = Deck::new();
-    assert_eq!(deck.count, 52);
-}
+mod tests {
+    use super::*;
 
-#[cfg(test)]
-#[test]
-fn deck_methods() {
-    let mut deck = Deck::new();
-    deck.deal_one();
-    assert_eq!(deck.count, 51);
+    #[test]
+    fn deck_init() {
+        let deck = Deck::new();
+        assert_eq!(deck.count, 52);
+    }
+
+    #[test]
+    fn deck_deal_one() {
+        let mut deck = Deck::new();
+        let _d = deck.deal_one();
+        assert_eq!(deck.count, 51);
+    }
+
+    #[test]
+    fn deck_deal_few() {
+        let mut deck = Deck::new();
+        let d = deck.deal_few(10);
+        assert_eq!(deck.count, 42);
+        assert_eq!(d.unwrap().len(), 10);
+    }
+
+    #[test]
+    fn deck_deal_few_over() {
+        let mut deck = Deck::new();
+        let d = deck.deal_few(100);
+        assert!(d.is_none());
+    }
 }
